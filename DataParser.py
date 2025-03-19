@@ -30,11 +30,11 @@ def parse_dzn(file_path):
     return parsed_data
 
 # Convert to JSON
-dzn_file = "toy.dzn"
+dzn_file = "instances/toy.dzn"
 json_output = parse_dzn(dzn_file)
 
 # Save as JSON file
-with open("output.json", "w") as json_file:
+with open("parsed_instances/toy.dzn.json", "w") as json_file:
     json.dump(json_output, json_file, indent=2)
 
 print(json.dumps(json_output, indent=2))
