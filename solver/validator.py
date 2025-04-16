@@ -23,6 +23,7 @@ class Validator:
             for w_id, allocation in enumerate(allocations):
                 warehouse_used_capacity[w_id] += allocation
 
+        # Validate warehouse capacity constraints
         for w_id, used in enumerate(warehouse_used_capacity):
             if used > self.problem.warehouses[w_id].capacity:
                 print(
@@ -34,6 +35,13 @@ class Validator:
             for w_id in range(self.problem.num_warehouses):
                 if self.solution.allocation[s1][w_id] > 0 and self.solution.allocation[s2][w_id] > 0:
                     print(f"Incompatible stores {s1} and {s2} assigned to warehouse {w_id}")
+                    return False
+
+        # Validate open warehouses condition
+        for store_id, allocations in enumerate(self.solution.allocation):
+            for w_id, allocation in enumerate(allocations):
+                if allocation > 0 and not self.solution.open_warehouses[w_id]:
+                    print(f"Store {store_id} is being supplied by a closed warehouse {w_id}")
                     return False
 
         return True

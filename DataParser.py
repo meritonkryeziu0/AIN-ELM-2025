@@ -39,12 +39,21 @@ def parse_dzn(file_path):
 #
 # print(json.dumps(json_output, indent=2))
 
-# Convert to JSON
-dzn_file = "instances/wlp01.dzn"
-json_output = parse_dzn(dzn_file)
 
-# Save as JSON file
-with open("parsed_instances/wlp01.dzn.json", "w") as json_file:
-    json.dump(json_output, json_file, indent=2)
+instance_files = [
+        "instances/wlp01.dzn",
+        "instances/wlp02.dzn",
+        "instances/wlp03.dzn",
+        "instances/wlp04.dzn",
+        # Add more instance files as needed
+    ]
 
-print(json.dumps(json_output, indent=2))
+for file_path in instance_files:
+    # Convert to JSON
+    json_output = parse_dzn(file_path)
+
+    # Save as JSON file
+    with open(f"parsed_{file_path}.json", "w") as json_file:
+        json.dump(json_output, json_file, indent=2)
+
+    print(json.dumps(json_output, indent=2))
