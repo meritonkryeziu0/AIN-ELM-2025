@@ -1,43 +1,7 @@
 import os
 from .instance_data import InstanceData
 
-
-# class Solution:
-#     def __init__(self, problem: InstanceData):
-#         self.problem = problem
-#         self.allocation = [[0] * self.problem.num_warehouses for _ in range(self.problem.num_stores)]
-#
-#     def fitness(self) -> int:
-#         total_fixed_cost = 0
-#         total_supply_cost = 0
-#         used_warehouses = set()
-#
-#         for store_id, allocations in enumerate(self.allocation):
-#             for warehouse_id, amount in enumerate(allocations):
-#                 if amount > 0:
-#                     used_warehouses.add(warehouse_id)
-#                     supply_cost = self.problem.supply_costs_matrix[store_id][warehouse_id]
-#                     total_supply_cost += amount * supply_cost
-#
-#         total_fixed_cost = sum(
-#             self.problem.warehouses[w_id].fixed_cost for w_id in used_warehouses
-#         )
-#
-#         return total_fixed_cost + total_supply_cost
-#
-#     def export(self) -> str:
-#         """Export the solution in the required format."""
-#         result = []
-#         for store_id, warehouse_allocations in enumerate(self.allocation):
-#             result.append(f"({','.join(map(str, warehouse_allocations))})")
-#         return '\n'.join(result)
-
 class Solution:
-
-    # def __init__(self, problem: InstanceData):
-    #     self.problem = problem
-    #     self.allocation = [[0] * self.problem.num_warehouses for _ in range(self.problem.num_stores)]
-    #     self.open_warehouses = [False] * self.problem.num_warehouses
 
     def __init__(self, problem: InstanceData = None):
         """ Initialize with an optional InstanceData problem. """
@@ -49,6 +13,8 @@ class Solution:
             self.problem = None  # If no problem, set it to None
             self.allocation = []  # Empty allocation
             self.open_warehouses = []  # Empty warehouse list
+
+        self.fitness_score = self.fitness()
 
     @classmethod
     def from_solution_data(cls, solution_data: str, problem: InstanceData) -> 'Solution':
@@ -78,14 +44,8 @@ class Solution:
             self.problem.warehouses[w_id].fixed_cost for w_id in used_warehouses
         )
 
-        return total_fixed_cost + total_supply_cost
-
-    # def export(self) -> str:
-    #     """Export the solution in the required format."""
-    #     result = []
-    #     for store_id, warehouse_allocations in enumerate(self.allocation):
-    #         result.append(f"({','.join(map(str, warehouse_allocations))})")
-    #     return '\n'.join(result)
+        self.fitness_score = total_fixed_cost + total_supply_cost
+        return self.fitness_score
 
     def export(self, file_path: str) -> None:
         """Export the solution to a file in the required matrix format, creating the directory if it doesn't exist."""
@@ -109,6 +69,15 @@ class Solution:
                     file.write('\n')
 
             file.write(']')  # Add closing bracket
+
+    def shallow_copy(self):
+        """Returns a shallow copy of the current instance."""
+        copy = self.__class__()  # Create a new instance of the same class
+        copy.problem = self.problem
+        copy.allocation = self.allocation.copy()
+        copy.open_warehouses = self.open_warehouses.copy()
+        copy.fitness_score = self.fitness_score
+        return copy
 
 # Example usage:
 # problem = WarehouseLocationProblem(json_data)

@@ -1,4 +1,6 @@
 from models.parser import Parser
+from solver.InitialSolution import InitialSolution
+from solver.Tweaks import Tweaks
 from solver.solver import Solver
 from solver.validator import Validator
 
@@ -20,22 +22,33 @@ if __name__ == "__main__":
 
         instance = parser.parse_instance(file_path)
 
-        solver = Solver(instance)
-        solution = solver.solve()
+        # solver = Solver(instance)
+        # initial_solution = solver.solve()
 
-        output_path = f"output/{file_path.split('/')[-1].replace('.dzn.json', '.txt')}"
-        solution.export(output_path)
+        init = InitialSolution(instance)
+        sol = init.generate_valid_solution()
 
-        is_valid = Validator(instance, solution).validate()
+        improved = Tweaks.move_store_allocation(sol, instance)
 
-        print(f"Solution score: {solution.fitness()}")
-        print(f"Exported to: {output_path}")
+        # output_path = f"output/{file_path.split('/')[-1].replace('.dzn.json', '.txt')}"
+        # initial_solution.export(output_path)
+
+        is_valid = Validator(instance, sol).validate()
+        # is_valid = Validator(instance, improved).validate()
+
+        print(f"Initial score: {sol.fitness_score}")
+        print(f"Solution score: {improved.fitness_score}")
+        # print(f"Exported to: {output_path}")
         print(f"Valid: {'Yes' if is_valid else 'No'}")
 
 
-if __name__ == "__main__":
-
-    for file_path in instance_files:
-        instance = parser.parse_instance(file_path)
-        solution = parser.parse_solution("output/" + file_path.split("/")[1].split(".")[0] + ".txt", instance)
-        print(Validator(instance, solution).validate())
+# if __name__ == "__main__":
+#
+#     for file_path in instance_files:
+#         instance = parser.parse_instance(file_path)
+#         initial_solution = parser.parse_solution("output/" + file_path.split("/")[1].split(".")[0] + ".txt", instance)
+#         initial_solution.fitness()
+#
+#         improved = Tweaks.move_store_allocation(initial_solution, instance)
+#         print(improved.fitness_score)
+#         print(Validator(instance, improved).validate())

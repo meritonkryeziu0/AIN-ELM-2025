@@ -1,3 +1,9 @@
+from typing import List
+
+from models.store import Store
+from models.warehouse import Warehouse
+
+
 class InstanceData:
 
     def __init__(self, num_warehouses, num_stores, supply_costs_matrix, warehouses, stores, incompatible_pairs):
