@@ -7,6 +7,8 @@ class Warehouse:
         self.capacity = capacity
         self.fixed_cost = fixed_cost
         self.supply_costs = supply_costs
+        self.open = True
+        self.start_capacity = capacity
 
     def get_cost_to_store(self, store_id: int) -> int:
         """Get supply cost to a specific store"""

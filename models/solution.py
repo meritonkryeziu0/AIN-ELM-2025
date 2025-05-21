@@ -1,20 +1,32 @@
 import os
+
+import numpy as np
+
 from .instance_data import InstanceData
 
 class Solution:
+    def __init__(self, problem=None):
+        self.problem = problem
+        self.fitness_score = None
 
-    def __init__(self, problem: InstanceData = None):
-        """ Initialize with an optional InstanceData problem. """
+        # Your original allocation style (optional if you keep your current design)
+        self.allocation = []
+        self.open_warehouses = []
+
+        # New properties for tweak_store compatibility
+        self.stores = []             # list of Store objects
+        self.warehouses = []         # list of Warehouse objects
+        self.incompatible_pairs = set()
+        self.count_req = 0           # used in tweak_store
+
         if problem is not None:
-            self.problem = problem
-            self.allocation = [[0] * self.problem.num_warehouses for _ in range(self.problem.num_stores)]
-            self.open_warehouses = [False] * self.problem.num_warehouses
-        else:
-            self.problem = None  # If no problem, set it to None
-            self.allocation = []  # Empty allocation
-            self.open_warehouses = []  # Empty warehouse list
+            # Initialize allocation and open_warehouses if needed
+            self.allocation = [[0] * problem.num_warehouses for _ in range(problem.num_stores)]
+            self.open_warehouses = [False] * problem.num_warehouses
+            # You may want to initialize stores and warehouses here or separately
 
-        self.fitness_score = self.fitness()
+        # Compute initial fitness
+        # self.fitness_score = self.fitness()
 
     @classmethod
     def from_solution_data(cls, solution_data: str, problem: InstanceData) -> 'Solution':
@@ -28,21 +40,38 @@ class Solution:
                 solution.allocation[store_id][warehouse_id] = int(allocation)
         return solution
 
+    # def fitness(self) -> int:
+    #     total_fixed_cost = 0
+    #     total_supply_cost = 0
+    #     used_warehouses = set()
+    #
+    #     for store_id, allocations in enumerate(self.allocation):
+    #         for warehouse_id, amount in enumerate(allocations):
+    #             if amount > 0:
+    #                 used_warehouses.add(warehouse_id)
+    #                 supply_cost = self.problem.supply_costs_matrix[store_id][warehouse_id]
+    #                 total_supply_cost += amount * supply_cost
+    #
+    #     total_fixed_cost = sum(
+    #         self.problem.warehouses[w_id].fixed_cost for w_id in used_warehouses
+    #     )
+    #
+    #     self.fitness_score = total_fixed_cost + total_supply_cost
+    #     return self.fitness_score
+
     def fitness(self) -> int:
-        total_fixed_cost = 0
-        total_supply_cost = 0
-        used_warehouses = set()
+        # Convert allocation and supply_costs_matrix to numpy arrays
+        allocation_np = np.array(self.allocation)
+        supply_costs_np = np.array(self.problem.supply_costs_matrix)
 
-        for store_id, allocations in enumerate(self.allocation):
-            for warehouse_id, amount in enumerate(allocations):
-                if amount > 0:
-                    used_warehouses.add(warehouse_id)
-                    supply_cost = self.problem.supply_costs_matrix[store_id][warehouse_id]
-                    total_supply_cost += amount * supply_cost
+        # Calculate total supply cost with element-wise multiplication and sum
+        total_supply_cost = np.sum(allocation_np * supply_costs_np)
 
-        total_fixed_cost = sum(
-            self.problem.warehouses[w_id].fixed_cost for w_id in used_warehouses
-        )
+        # Warehouses used: any warehouse with sum of allocated supply > 0
+        used_warehouses = np.where(np.sum(allocation_np, axis=0) > 0)[0]
+
+        # Sum fixed costs of used warehouses
+        total_fixed_cost = sum(self.problem.warehouses[w].fixed_cost for w in used_warehouses)
 
         self.fitness_score = total_fixed_cost + total_supply_cost
         return self.fitness_score
@@ -72,11 +101,28 @@ class Solution:
 
     def shallow_copy(self):
         """Returns a shallow copy of the current instance."""
-        copy = self.__class__()  # Create a new instance of the same class
+
+        # self.problem = problem
+        # self.fitness_score = None
+        #
+        # # Your original allocation style (optional if you keep your current design)
+        # self.allocation = []
+        # self.open_warehouses = []
+        #
+        # # New properties for tweak_store compatibility
+        # self.stores = []             # list of Store objects
+        # self.warehouses = []         # list of Warehouse objects
+        # self.incompatible_pairs = set()
+        # self.count_req = 0           # used in tweak_store
+        copy = self.__class__(self.problem)  # Create a new instance of the same class
         copy.problem = self.problem
         copy.allocation = self.allocation.copy()
         copy.open_warehouses = self.open_warehouses.copy()
         copy.fitness_score = self.fitness_score
+        copy.stores = self.stores.copy()
+        copy.warehouses = self.warehouses.copy()
+        copy.incompatible_pairs = self.incompatible_pairs.copy()
+        copy.count_req = self.count_req
         return copy
 
 # Example usage:

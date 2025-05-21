@@ -43,11 +43,21 @@ class Parser:
             )
             stores.append(store)
 
+        # # Incompatibilities (converted to 0-based indexing)
+        # incompatible_pairs: List[Tuple[int, int]] = [
+        #     (pair[0] - 1, pair[1] - 1)  # Convert to 0-based
+        #     for pair in data["IncompatiblePairs"]
+        # ]
+
         # Incompatibilities (converted to 0-based indexing)
-        incompatible_pairs: List[Tuple[int, int]] = [
-            (pair[0] - 1, pair[1] - 1)  # Convert to 0-based
-            for pair in data["IncompatiblePairs"]
-        ]
+        incompatible_pairs: List[Tuple[int, int]] = []
+        store_map = {store.id: store for store in stores}
+
+        for pair in data["IncompatiblePairs"]:
+            s1, s2 = pair[0] - 1, pair[1] - 1  # convert to 0-based
+            incompatible_pairs.append((s1, s2))
+            store_map[s1].incompatible_stores.append(s2)
+            store_map[s2].incompatible_stores.append(s1)
 
         return InstanceData(num_warehouses, num_stores, supply_costs_matrix, warehouses, stores, incompatible_pairs)
 

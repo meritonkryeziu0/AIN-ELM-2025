@@ -1,3 +1,5 @@
+import copy
+
 from models.parser import Parser
 from solver.InitialSolution import InitialSolution
 from solver.Tweaks import Tweaks
@@ -8,10 +10,10 @@ from solver.validator import Validator
 parser = Parser()
 
 instance_files = [
-        "parsed_instances/wlp01.dzn.json",
+        # "parsed_instances/wlp01.dzn.json",
         "parsed_instances/wlp02.dzn.json",
-        "parsed_instances/wlp03.dzn.json",
-        "parsed_instances/wlp04.dzn.json",
+        # "parsed_instances/wlp03.dzn.json",
+        # "parsed_instances/wlp04.dzn.json",
     ]
 
 
@@ -25,21 +27,25 @@ if __name__ == "__main__":
         # solver = Solver(instance)
         # initial_solution = solver.solve()
 
-        init = InitialSolution(instance)
-        sol = init.generate_valid_solution()
+        # init = InitialSolution(instance)
 
-        improved = Tweaks.move_store_allocation(sol, instance)
+        sol = Solver.initial_solution(copy.deepcopy(instance))
+        # sol.fitness()
+        # sol = init.generate_valid_solution()
+
+        improved = Tweaks.tweak_with_iterations(sol, instance)
 
         # output_path = f"output/{file_path.split('/')[-1].replace('.dzn.json', '.txt')}"
         # initial_solution.export(output_path)
 
         is_valid = Validator(instance, sol).validate()
-        # is_valid = Validator(instance, improved).validate()
+        is_valid_improved = Validator(instance, improved).validate()
 
         print(f"Initial score: {sol.fitness_score}")
         print(f"Solution score: {improved.fitness_score}")
         # print(f"Exported to: {output_path}")
         print(f"Valid: {'Yes' if is_valid else 'No'}")
+        print(f"Valid: {'Yes' if is_valid_improved else 'No'}")
 
 
 # if __name__ == "__main__":
